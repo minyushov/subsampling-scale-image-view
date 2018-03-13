@@ -1,8 +1,5 @@
 apply plugin: 'com.android.library'
-
-group = 'com.davemorrissey.labs'
-archivesBaseName = 'subsampling-scale-image-view'
-version = '3.9.0'
+apply plugin: 'com.minyushov.bintray'
 
 android {
     compileSdkVersion 27
@@ -34,4 +31,14 @@ task javadoc(type: Javadoc) {
     options.links = ['https://developer.android.com/reference/']
 }
 
-apply from: rootProject.file('release.gradle')
+bintrayUpload {
+    user = "minyushov"
+    dryRun = false
+    repo = "android"
+    groupId = "com.minyushov.android"
+    artifactId = "subsampling-scale-image-view"
+    version = "3.9.0"
+    vcsUrl = "https://github.com/minyushov/subsampling-scale-image-view.git"
+    license = "Apache-2.0"
+    docs = false
+}
