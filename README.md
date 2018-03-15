@@ -84,8 +84,12 @@ Versions 3.9.0, 3.8.0 and 3.0.0 contain breaking changes. Migration instructions
 
 **1)** Add this library as a dependency in your app's build.gradle file.
 
+    repositories {
+        maven { url "https://dl.bintray.com/minyushov/android" }
+    }
+
     dependencies {
-        implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.9.0'
+        implementation 'com.minyushov.android:subsampling-scale-image-view:3.9.1'
     }
 
 **2)** Add the view to your layout XML.
