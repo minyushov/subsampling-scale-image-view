@@ -43,6 +43,7 @@ import com.davemorrissey.labs.subscaleview.decoder.SkiaImageRegionDecoder;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -280,6 +281,8 @@ public class SubsamplingScaleImageView extends View {
     //The logical density of the display
     private final float density;
 
+    private final HashSet<AsyncTask> tasks = new HashSet<>();
+
     // A global preference for bitmap format, available to decoder classes that respect it
     private static Bitmap.Config preferredBitmapConfig;
 
@@ -446,7 +449,7 @@ public class SubsamplingScaleImageView extends View {
                 if (uri == null && previewSource.getResource() != null) {
                     uri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getContext().getPackageName() + "/" + previewSource.getResource());
                 }
-                BitmapLoadTask task = new BitmapLoadTask(this, getContext(), bitmapDecoderFactory, uri, true);
+                BitmapLoadTask task = new BitmapLoadTask(this, getContext(), bitmapDecoderFactory, uri, true, tasks);
                 execute(task);
             }
         }
@@ -463,11 +466,11 @@ public class SubsamplingScaleImageView extends View {
             }
             if (imageSource.getTile() || sRegion != null) {
                 // Load the bitmap using tile decoding.
-                TilesInitTask task = new TilesInitTask(this, getContext(), regionDecoderFactory, uri);
+                TilesInitTask task = new TilesInitTask(this, getContext(), regionDecoderFactory, uri, tasks);
                 execute(task);
             } else {
                 // Load the bitmap as a single image.
-                BitmapLoadTask task = new BitmapLoadTask(this, getContext(), bitmapDecoderFactory, uri, false);
+                BitmapLoadTask task = new BitmapLoadTask(this, getContext(), bitmapDecoderFactory, uri, false, tasks);
                 execute(task);
             }
         }
@@ -478,6 +481,7 @@ public class SubsamplingScaleImageView extends View {
      */
     private void reset(boolean newImage) {
         debug("reset newImage=" + newImage);
+        cancelTasks();
         scale = 0f;
         scaleStart = 0f;
         vTranslate = null;
@@ -1265,7 +1269,7 @@ public class SubsamplingScaleImageView extends View {
             // Use BitmapDecoder for better image support.
             decoder.recycle();
             decoder = null;
-            BitmapLoadTask task = new BitmapLoadTask(this, getContext(), bitmapDecoderFactory, uri, false);
+            BitmapLoadTask task = new BitmapLoadTask(this, getContext(), bitmapDecoderFactory, uri, false, tasks);
             execute(task);
 
         } else {
@@ -1274,7 +1278,7 @@ public class SubsamplingScaleImageView extends View {
 
             List<Tile> baseGrid = tileMap.get(fullImageSampleSize);
             for (Tile baseTile : baseGrid) {
-                TileLoadTask task = new TileLoadTask(this, decoder, baseTile);
+                TileLoadTask task = new TileLoadTask(this, decoder, baseTile, tasks);
                 execute(task);
             }
             refreshRequiredTiles(true);
@@ -1308,7 +1312,7 @@ public class SubsamplingScaleImageView extends View {
                     if (tileVisible(tile)) {
                         tile.visible = true;
                         if (!tile.loading && tile.bitmap == null && load) {
-                            TileLoadTask task = new TileLoadTask(this, decoder, tile);
+                            TileLoadTask task = new TileLoadTask(this, decoder, tile, tasks);
                             execute(task);
                         }
                     } else if (tile.sampleSize != fullImageSampleSize) {
@@ -1536,14 +1540,22 @@ public class SubsamplingScaleImageView extends View {
         private final WeakReference<Context> contextRef;
         private final WeakReference<DecoderFactory<? extends ImageRegionDecoder>> decoderFactoryRef;
         private final Uri source;
+        private final HashSet<AsyncTask> tasks;
         private ImageRegionDecoder decoder;
         private Exception exception;
 
-        TilesInitTask(SubsamplingScaleImageView view, Context context, DecoderFactory<? extends ImageRegionDecoder> decoderFactory, Uri source) {
+        TilesInitTask(SubsamplingScaleImageView view, Context context, DecoderFactory<? extends ImageRegionDecoder> decoderFactory, Uri source, HashSet<AsyncTask> tasks) {
             this.viewRef = new WeakReference<>(view);
             this.contextRef = new WeakReference<>(context);
             this.decoderFactoryRef = new WeakReference<DecoderFactory<? extends ImageRegionDecoder>>(decoderFactory);
             this.source = source;
+            this.tasks = tasks;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            tasks.add(this);
         }
 
         @Override
@@ -1579,6 +1591,7 @@ public class SubsamplingScaleImageView extends View {
 
         @Override
         protected void onPostExecute(int[] xyo) {
+            tasks.remove(this);
             final SubsamplingScaleImageView view = viewRef.get();
             if (view != null) {
                 if (decoder != null && xyo != null && xyo.length == 3) {
@@ -1587,6 +1600,12 @@ public class SubsamplingScaleImageView extends View {
                     view.onImageEventListener.onImageLoadError(exception);
                 }
             }
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            tasks.remove(this);
         }
     }
 
@@ -1629,13 +1648,22 @@ public class SubsamplingScaleImageView extends View {
         private final WeakReference<SubsamplingScaleImageView> viewRef;
         private final WeakReference<ImageRegionDecoder> decoderRef;
         private final WeakReference<Tile> tileRef;
+        private final HashSet<AsyncTask> tasks;
         private Exception exception;
 
-        TileLoadTask(SubsamplingScaleImageView view, ImageRegionDecoder decoder, Tile tile) {
+        TileLoadTask(SubsamplingScaleImageView view, ImageRegionDecoder decoder, Tile tile, HashSet<AsyncTask> tasks) {
             this.viewRef = new WeakReference<>(view);
             this.decoderRef = new WeakReference<>(decoder);
             this.tileRef = new WeakReference<>(tile);
+            this.tasks = tasks;
             tile.loading = true;
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            tasks.add(this);
         }
 
         @Override
@@ -1676,6 +1704,7 @@ public class SubsamplingScaleImageView extends View {
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
+            tasks.remove(this);
             final SubsamplingScaleImageView subsamplingScaleImageView = viewRef.get();
             final Tile tile = tileRef.get();
             if (subsamplingScaleImageView != null && tile != null) {
@@ -1688,6 +1717,13 @@ public class SubsamplingScaleImageView extends View {
                 }
             }
         }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            tasks.remove(this);
+        }
+
     }
 
     /**
@@ -1720,15 +1756,23 @@ public class SubsamplingScaleImageView extends View {
         private final WeakReference<DecoderFactory<? extends ImageDecoder>> decoderFactoryRef;
         private final Uri source;
         private final boolean preview;
+        private final HashSet<AsyncTask> tasks;
         private Bitmap bitmap;
         private Exception exception;
 
-        BitmapLoadTask(SubsamplingScaleImageView view, Context context, DecoderFactory<? extends ImageDecoder> decoderFactory, Uri source, boolean preview) {
+        BitmapLoadTask(SubsamplingScaleImageView view, Context context, DecoderFactory<? extends ImageDecoder> decoderFactory, Uri source, boolean preview, HashSet<AsyncTask> tasks) {
             this.viewRef = new WeakReference<>(view);
             this.contextRef = new WeakReference<>(context);
             this.decoderFactoryRef = new WeakReference<DecoderFactory<? extends ImageDecoder>>(decoderFactory);
             this.source = source;
             this.preview = preview;
+            this.tasks = tasks;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            tasks.add(this);
         }
 
         @Override
@@ -1755,6 +1799,7 @@ public class SubsamplingScaleImageView extends View {
 
         @Override
         protected void onPostExecute(Integer orientation) {
+            tasks.remove(this);
             SubsamplingScaleImageView subsamplingScaleImageView = viewRef.get();
             if (subsamplingScaleImageView != null) {
                 if (bitmap != null && orientation != null) {
@@ -1771,6 +1816,12 @@ public class SubsamplingScaleImageView extends View {
                     }
                 }
             }
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            tasks.remove(this);
         }
     }
 
@@ -2352,6 +2403,13 @@ public class SubsamplingScaleImageView extends View {
      */
     private int px(int px) {
         return (int)(density * px);
+    }
+
+    private void cancelTasks(){
+        for (AsyncTask task : tasks) {
+            if(!task.isCancelled()) task.cancel(true);
+        }
+        tasks.clear();
     }
 
     /**
