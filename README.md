@@ -89,7 +89,7 @@ Versions 3.9.0, 3.8.0 and 3.0.0 contain breaking changes. Migration instructions
     }
 
     dependencies {
-        implementation 'com.minyushov.android:subsampling-scale-image-view:3.9.1'
+        implementation 'com.minyushov.android:subsampling-scale-image-view:3.10.1'
     }
 
 **2)** Add the view to your layout XML.
