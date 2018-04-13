@@ -33,7 +33,6 @@ bintrayUpload {
         destinationDir = rootProject.file("docs/javadoc")
         classpath += configurations.javadocs
         options {
-            links "https://docs.oracle.com/javase/8/docs/api/"
             links "https://developer.android.com/reference/"
         }
     }
