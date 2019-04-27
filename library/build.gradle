@@ -15,15 +15,9 @@ android {
   }
 }
 
-configurations {
-  javadocs
-}
-
 dependencies {
-  javadocs 'com.android.support:support-annotations:28.0.0'
-  javadocs 'com.android.support:exifinterface:28.0.0'
-  implementation 'com.android.support:support-annotations:28.0.0'
-  implementation 'com.android.support:exifinterface:28.0.0'
+  implementation 'androidx.annotation:annotation:1.0.2'
+  implementation 'androidx.exifinterface:exifinterface:1.0.0'
 }
 
 bintrayUpload {
@@ -32,13 +26,19 @@ bintrayUpload {
   repo = "android"
   groupId = "com.minyushov.android"
   artifactId = "subsampling-scale-image-view"
-  version = "3.10.1"
+  version = "3.11"
   vcsUrl = "https://github.com/minyushov/subsampling-scale-image-view.git"
   license = "Apache-2.0"
   docsSettings {
     destinationDir = rootProject.file("docs/javadoc")
-    classpath += configurations.javadocs
+    project.android.libraryVariants.all { variant ->
+      if (variant.name == 'release') {
+        classpath += files(variant.javaCompileProvider.get().classpath)
+      }
+    }
     options {
+      docTitle "Subsampling ScaleImageView ${bintrayUpload.version.get()}"
+      windowTitle docTitle
       links "https://developer.android.com/reference/"
     }
   }
