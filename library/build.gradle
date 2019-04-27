@@ -6,7 +6,6 @@ android {
 
   defaultConfig {
     minSdkVersion androidMinSdkVersion
-    consumerProguardFiles 'proguard-rules.txt'
   }
 
   libraryVariants.all {
