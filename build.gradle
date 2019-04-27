@@ -1,25 +1,23 @@
 allprojects {
-    repositories {
-        mavenCentral()
-        jcenter()
-        google()
-    }
+  repositories {
+    jcenter()
+    google()
+  }
 }
 
 buildscript {
-    ext {
-        androidMinSdkVersion = 19
-        androidCompileSdkVersion = 28
-        androidTargetSdkVersion = 28
-    }
-    repositories {
-        mavenCentral()
-        jcenter()
-        google()
-        maven { url 'https://dl.bintray.com/minyushov/gradle' }
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.0'
-        classpath 'com.minyushov.gradle:bintray:1.2.3'
-    }
+  ext {
+    androidMinSdkVersion = 19
+    androidCompileSdkVersion = 28
+    androidTargetSdkVersion = 28
+  }
+  repositories {
+    jcenter()
+    google()
+    maven { url 'https://dl.bintray.com/minyushov/gradle' }
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:3.4.0'
+    classpath 'com.minyushov.gradle:bintray:1.2.3'
+  }
 }

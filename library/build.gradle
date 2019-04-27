@@ -2,45 +2,45 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.minyushov.bintray'
 
 android {
-    compileSdkVersion androidCompileSdkVersion
+  compileSdkVersion androidCompileSdkVersion
 
-    defaultConfig {
-        minSdkVersion androidMinSdkVersion
-        consumerProguardFiles 'proguard-rules.txt'
-    }
+  defaultConfig {
+    minSdkVersion androidMinSdkVersion
+    consumerProguardFiles 'proguard-rules.txt'
+  }
 
-    libraryVariants.all {
-        it.generateBuildConfigProvider.configure {
-            it.enabled = false
-        }
+  libraryVariants.all {
+    it.generateBuildConfigProvider.configure {
+      it.enabled = false
     }
+  }
 }
 
 configurations {
-    javadocs
+  javadocs
 }
 
 dependencies {
-    javadocs 'com.android.support:support-annotations:28.0.0'
-    javadocs 'com.android.support:exifinterface:28.0.0'
-    implementation 'com.android.support:support-annotations:28.0.0'
-    implementation 'com.android.support:exifinterface:28.0.0'
+  javadocs 'com.android.support:support-annotations:28.0.0'
+  javadocs 'com.android.support:exifinterface:28.0.0'
+  implementation 'com.android.support:support-annotations:28.0.0'
+  implementation 'com.android.support:exifinterface:28.0.0'
 }
 
 bintrayUpload {
-    user = "minyushov"
-    dryRun = false
-    repo = "android"
-    groupId = "com.minyushov.android"
-    artifactId = "subsampling-scale-image-view"
-    version = "3.10.1"
-    vcsUrl = "https://github.com/minyushov/subsampling-scale-image-view.git"
-    license = "Apache-2.0"
-    docsSettings {
-        destinationDir = rootProject.file("docs/javadoc")
-        classpath += configurations.javadocs
-        options {
-            links "https://developer.android.com/reference/"
-        }
+  user = "minyushov"
+  dryRun = false
+  repo = "android"
+  groupId = "com.minyushov.android"
+  artifactId = "subsampling-scale-image-view"
+  version = "3.10.1"
+  vcsUrl = "https://github.com/minyushov/subsampling-scale-image-view.git"
+  license = "Apache-2.0"
+  docsSettings {
+    destinationDir = rootProject.file("docs/javadoc")
+    classpath += configurations.javadocs
+    options {
+      links "https://developer.android.com/reference/"
     }
+  }
 }
