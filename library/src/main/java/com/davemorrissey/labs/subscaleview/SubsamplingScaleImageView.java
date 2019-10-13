@@ -294,7 +294,7 @@ public class SubsamplingScaleImageView extends View {
         setMinimumTileDpi(320);
         setGestureDetector(context);
         this.handler = new Handler(new Handler.Callback() {
-            public boolean handleMessage(Message message) {
+            public boolean handleMessage(@NonNull Message message) {
                 if (message.what == MESSAGE_LONG_CLICK && onLongClickListener != null) {
                     maxTouchCount = 0;
                     SubsamplingScaleImageView.super.setOnLongClickListener(onLongClickListener);
@@ -1395,7 +1395,7 @@ public class SubsamplingScaleImageView extends View {
             // Choose the smallest ratio as inSampleSize value, this will guarantee
             // a final image with both dimensions larger than or equal to the
             // requested height and width.
-            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+            inSampleSize = Math.min(heightRatio, widthRatio);
         }
 
         // We want the actual sample size that will be used, so round down to nearest power of 2.
