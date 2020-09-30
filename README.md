@@ -8,7 +8,7 @@ The view optionally uses subsampling and tiles to support very large images - a 
 
 #### Integration
 
-```groovy
+```gradle
 repositories {
   maven { url "https://dl.bintray.com/minyushov/android" }
 }
@@ -97,11 +97,11 @@ Versions 3.9.0, 3.8.0 and 3.0.0 contain breaking changes. Migration instructions
 
 ```gradle
 repositories {
-    maven { url "https://dl.bintray.com/minyushov/android" }
+  maven { url "https://dl.bintray.com/minyushov/android" }
 }
 
 dependencies {
-    implementation 'com.minyushov.android:subsampling-scale-image-view:3.10.1'
+  implementation "com.minyushov.android:slidinguppanel:x.x.x"
 }
 ```
 
