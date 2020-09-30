@@ -7,26 +7,20 @@ android {
   defaultConfig {
     minSdkVersion androidMinSdkVersion
   }
-
-  libraryVariants.all {
-    it.generateBuildConfigProvider.configure {
-      it.enabled = false
-    }
-  }
 }
 
 dependencies {
   implementation 'androidx.annotation:annotation:1.1.0'
-  implementation 'androidx.exifinterface:exifinterface:1.0.0'
+  implementation 'androidx.exifinterface:exifinterface:1.3.0'
 }
 
-bintrayUpload {
+bintray {
   user = "minyushov"
   dryRun = false
   repo = "android"
   groupId = "com.minyushov.android"
   artifactId = "subsampling-scale-image-view"
-  version = "3.12"
+  version = "3.13"
   vcsUrl = "https://github.com/minyushov/subsampling-scale-image-view.git"
   license = "Apache-2.0"
   docsSettings {
