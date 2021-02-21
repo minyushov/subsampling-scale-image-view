@@ -1,6 +1,6 @@
 Subsampling Scale Image View
 ===========================
-[![Download](https://api.bintray.com/packages/minyushov/android/subsampling-scale-image-view/images/download.svg)](https://bintray.com/minyushov/android/subsampling-scale-image-view/_latestVersion)
+![Maven Central](https://img.shields.io/maven-central/v/io.github.minyushov/scale-image-view)
 
 A custom image view for Android, designed for photo galleries and displaying huge images (e.g. maps and building plans) without `OutOfMemoryError`s. Includes pinch to zoom, panning, rotation and animation support, and allows easy extension so you can add your own overlays and touch event detection.
 
@@ -9,12 +9,8 @@ The view optionally uses subsampling and tiles to support very large images - a 
 #### Integration
 
 ```gradle
-repositories {
-  maven { url "https://dl.bintray.com/minyushov/android" }
-}
-
 dependencies {
-  implementation "com.minyushov.android:slidinguppanel:x.x.x"
+  implementation "io.github.minyushov:scale-image-view:$version"
 }
 ```
 
